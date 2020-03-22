@@ -110,11 +110,11 @@ public class OnlineDocument extends Application {
         menuBar.getMenus().add(fileMenu);
 
         // Create a text field
-        TextField textField = new TextField();
-        textField.setPrefSize(1000,800);
-        textField.setText("Hello " + name);
+        TextArea textArea = new TextArea();
+        textArea.setPrefSize(1000,800);
+        textArea.setText("Hello " + name);
 
-        vBox.getChildren().addAll(menuBar, textField);
+        vBox.getChildren().addAll(menuBar, textArea);
         pane.getChildren().add(vBox);
         Scene scene = new Scene(pane,1000,800);
         stage.setScene(scene);
