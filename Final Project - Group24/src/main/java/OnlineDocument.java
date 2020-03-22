@@ -1,8 +1,10 @@
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -15,8 +17,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.io.File;
-
 public class OnlineDocument extends Application {
+    // Create a Text Area
+    private TextArea textArea = new TextArea();
     @Override
     public void start(Stage primaryStage) throws Exception {
 
@@ -83,9 +86,11 @@ public class OnlineDocument extends Application {
     }
 
     void documentStage(String name){
+        ClientBackend clientObj = new ClientBackend();
         Stage stage = new Stage();
         Pane pane = new Pane();
         VBox vBox = new VBox();
+
 
         // Create Menu
         Menu fileMenu = new Menu("File");
@@ -109,10 +114,13 @@ public class OnlineDocument extends Application {
         MenuBar menuBar = new MenuBar();
         menuBar.getMenus().add(fileMenu);
 
-        // Create a text field
-        TextArea textArea = new TextArea();
+
         textArea.setPrefSize(1000,800);
-        textArea.setText("Hello " + name);
+        textArea.setPromptText("Hello " + name + "," + " please type to start your document."); //Creates prompt text
+        textArea.setFocusTraversable(false);
+
+        //Adds a listener to the textArea so we can see how the user is editing in real time. Sends to server.
+        textArea.textProperty().addListener((_Observer, _previousVal, _currentVal) -> clientObj.sendToServer(_currentVal));
 
         vBox.getChildren().addAll(menuBar, textArea);
         pane.getChildren().add(vBox);
@@ -122,4 +130,9 @@ public class OnlineDocument extends Application {
         //stage.setMaximized(true);
         stage.show();
     }
+
+    TextArea getTextArea(){
+        return textArea;
+    }
+
 }
