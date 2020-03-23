@@ -1,5 +1,6 @@
 import javafx.application.Application;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -15,8 +16,13 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.event.EventHandler;
 
 import java.io.File;
+import java.io.IOException;
+
 public class OnlineDocument extends Application {
     // Create a Text Area
     private TextArea textArea = new TextArea();
@@ -120,8 +126,16 @@ public class OnlineDocument extends Application {
         textArea.setFocusTraversable(false);
 
         //Adds a listener to the textArea so we can see how the user is editing in real time. Sends to server.
-        textArea.textProperty().addListener((_Observer, _previousVal, _currentVal) -> clientObj.sendToServer(_currentVal));
+        textArea.textProperty().addListener((_Observer, _previousVal, _currentVal) -> {
+            try {
+                clientObj.sendToServer(_currentVal);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
+
+                               
         vBox.getChildren().addAll(menuBar, textArea);
         pane.getChildren().add(vBox);
         Scene scene = new Scene(pane,1000,800);
