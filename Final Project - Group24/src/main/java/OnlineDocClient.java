@@ -30,7 +30,7 @@ public class OnlineDocClient extends Application {
         Pane pane = new Pane();
 
         // Implement logo image
-        Image image = new Image("Resources/Images/logo.png");
+        Image image = new Image("Images/logo.png");
         ImageView imageView = new ImageView(image);
         // Set image view to appropriate size
         imageView.setFitWidth(160);
@@ -40,7 +40,7 @@ public class OnlineDocClient extends Application {
         imageView.setY(50);
 
         //Implement Exit Button Image
-        Image imageX = new Image("Resources/Images/X.png");
+        Image imageX = new Image("Images/X.png");
         ImageView imageViewX = new ImageView(imageX);
         // Set image view to appropriate size
         imageViewX.setFitWidth(25);
@@ -130,7 +130,7 @@ public class OnlineDocClient extends Application {
         Stage stage = new Stage();
 
         // Implement logo image
-        Image image = new Image("Resources/Images/logo.png");
+        Image image = new Image("Images/logo.png");
         ImageView imageView = new ImageView(image);
         // Set image view to appropriate size
         imageView.setFitWidth(120);
@@ -138,7 +138,7 @@ public class OnlineDocClient extends Application {
 
 
         //Implement Exit Button Image
-        Image imageX = new Image("Resources/Images/X.png");
+        Image imageX = new Image("Images/X.png");
         ImageView imageViewX = new ImageView(imageX);
         // Set image view to appropriate size
         imageViewX.setFitWidth(20);
@@ -171,7 +171,7 @@ public class OnlineDocClient extends Application {
         });
 
         //Implement Minimize Button Image
-        Image imageM = new Image("Resources/Images/-.png");
+        Image imageM = new Image("Images/-.png");
         ImageView imageViewM = new ImageView(imageM);
         // Set image view to appropriate size
         imageViewM.setFitWidth(20);
