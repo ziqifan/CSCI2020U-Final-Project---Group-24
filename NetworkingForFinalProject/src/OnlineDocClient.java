@@ -1,4 +1,6 @@
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -244,13 +246,30 @@ public class OnlineDocClient extends Application {
         textArea.setPromptText("Hello " + name + ", please type to start your document."); //Creates prompt text
         textArea.setFocusTraversable(false);
         //Adds a listener to the textArea so we can see how the user is editing in real time. Sends to server.
-        textArea.textProperty().addListener((_Observer, _previousVal, _currentVal) -> {
-            try {
-                clientObj.sendToServer(_currentVal);
-            } catch (IOException e) {
-                e.printStackTrace();
+        //textArea.textProperty().addListener((_Observer, _previousVal, _currentVal) -> {
+        ChangeListener<String> TempListener = new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String _previousVal, String  _currentVal) {
+                try {
+                    //System.out.println("CUR: " + _currentVal);
+                    //System.out.println("PREV: " + _previousVal);
+
+                    if(!_currentVal.equals(_previousVal) && !_currentVal.isEmpty() && !_previousVal.isEmpty()){
+                        //clientObj.RemoveListener();
+                        int offset =  _currentVal.length() - _previousVal.length();
+                        //System.out.println("PREV LENGTH: " + _previousVal.length());
+                        //System.out.println("CUR LENGTH: " + _currentVal.length());
+                        clientObj.sendToServer(_currentVal, textArea, offset);
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        });
+        };
+        clientObj.SetListener(TempListener);
+        clientObj.AddListener();
+        //});
 
         // Implement a small menu for manipulate text in text area
         // Text Font

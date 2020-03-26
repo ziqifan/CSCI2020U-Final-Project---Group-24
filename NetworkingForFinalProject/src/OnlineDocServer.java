@@ -108,24 +108,26 @@ public class OnlineDocServer extends Application {
                 this.outputToClient = new DataOutputStream(
                         socket.getOutputStream());
 
-                // Continuously serve the client
+                // Serve the client by processing messages sent from the client and storing them into the txt document,
+                //once the changes are processed they are then sent to all other clients.
                 while (true) {
                     // Receive Message from client
                     String inmsg = inputFromClient.readUTF();
                     if(!inmsg.equals("DONE")){
                         this.NewMessage += inmsg;
-                        System.out.println("Stuff is adding " + inmsg);
+                        //System.out.println("Stuff is adding " + inmsg);
                     }
                     else if(inmsg.equals("DONE")){
-                        System.out.println("Stuff is done");
+                        System.out.println(this.NewMessage);
                         _FileO("src/Resources/Test.txt", this.NewMessage);
                         this.OldMessage = this.NewMessage;
                         this.NewMessage = "";
                     }
 
 
+                    //Sends the final message update to any client that is not the client which sent the data.
                     for (HandleAClient temp:AllClients) {
-                        if(temp.GetNumber() == this.MyNumber){
+                        if(temp.GetNumber() != this.MyNumber){
                             _testFileIn("src/Resources/Test.txt", temp);
                         }
                     }
