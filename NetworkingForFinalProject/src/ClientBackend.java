@@ -124,6 +124,39 @@ public class ClientBackend extends OnlineDocClient {
     void RemoveListener(){
         this.MyTextArea.textProperty().removeListener(this.MyListener);
     }
+
+    public String[] getCurrent(){
+        return _currentLine;
+    }
+
+    public void _FileO(String _filePath, String _line) throws IOException {
+        System.out.println(_line);
+        BufferedWriter _out = new BufferedWriter(new FileWriter(_filePath, true));
+        _out.append(_line);
+        _out.newLine();
+        _out.flush();
+        _out.close();
+    }
+
+    public void _FileI(File _file, TextArea _txt) {
+
+        if (_file.exists()) {
+            String _nextLine;
+            try {
+                Scanner _search = new Scanner(_file);
+                while (_search.hasNextLine()) {
+
+                    _nextLine = _search.nextLine();
+                    if (_nextLine != null) {
+                        _txt.appendText(_nextLine + '\n');
+                    }
+
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
 
 

@@ -7,6 +7,13 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -14,17 +21,29 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.*;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 public class OnlineDocClient extends Application {
     // Create a Text Area
     private TextArea textArea = new TextArea();
+
+    private double _startMouseX;
+    private double _startMouseY;
+    private double _endMouseX;
+    private double _endMouseY;
+
+    //Create Border Pane
+    private BorderPane borderPane = new BorderPane();
     @Override
     public void start(Stage primaryStage) throws Exception {
 
@@ -214,27 +233,106 @@ public class OnlineDocClient extends Application {
         // Create File Menu
         Menu fileMenu = new Menu("File");
         fileMenu.setStyle("-fx-font-size: 15px;");
+
         // Create menu items
+        MenuItem itemOpen = new MenuItem("Open");
         MenuItem itemDownload = new MenuItem("Download");
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Word Document", "*.docx"),
-                new FileChooser.ExtensionFilter("Text Document", "*.txt")
-        );
-        itemDownload.setOnAction(e->{
+        _filePicker(fileChooser);
+        itemOpen.setOnAction(e->{
             File selectedFile = fileChooser.showOpenDialog(stage);
+            if(selectedFile != null) {
+                clientObj._FileI(selectedFile, textArea);
+            }
         });
+
+        itemDownload.setOnAction(e-> {
+            File selectedFile = fileChooser.showSaveDialog(stage);
+            if (clientObj.getCurrent() != null && selectedFile != null) {
+                if(selectedFile.length() > 0){
+                    selectedFile.delete();
+                }
+                for (int i = 0; i < clientObj.getCurrent().length; i++) {
+                    if (clientObj.getCurrent()[i] != null) {
+                        try {
+                            clientObj._FileO(selectedFile.getPath(), clientObj.getCurrent()[i]);
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+
         // Add items to menu
+        fileMenu.getItems().addAll(itemOpen);
         fileMenu.getItems().addAll(itemDownload);
+
         // Create Edit Menu
         Menu editMenu = new Menu("Edit");
         editMenu.setStyle("-fx-font-size: 15px;");
+        MenuItem _selectAll = new MenuItem("Select All");
+        MenuItem _Highlight = new MenuItem("Highlight");
+
+        editMenu.getItems().addAll(_selectAll, _Highlight);
+        _selectAll.setOnAction(e->{
+            textArea.selectAll();
+        });
+
+        textArea.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                _startMouseX = event.getSceneX();
+                _startMouseY = event.getSceneY();
+
+                System.out.println(_startMouseX + " " + _startMouseY);
+            }
+        });
+
+        textArea.setOnMouseReleased(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                _endMouseX = event.getSceneX();
+                _endMouseY = event.getSceneY();
+            }
+        });
+
+        _Highlight.setOnAction(e->{
+            //textArea.setBlendMode(BlendMode.ADD);
+            Text _selected = new Text(textArea.getSelectedText());
+            _selected.setFont(textArea.getFont());
+            double _txtWidth = _selected.getBoundsInLocal().getWidth();
+            double _txtHeight = _selected.getBoundsInLocal().getHeight();
+            double _txtX = _selected.getBoundsInLocal().getMaxX();
+            double _txtY = _selected.getBoundsInLocal().getMinY();
+            Rectangle _rec = new Rectangle(_startMouseX - _endMouseX,_startMouseY - _endMouseY + _txtY,_txtWidth,_txtHeight);
+            _rec.setBlendMode(BlendMode.DARKEN);
+
+
+            //_rec.setFill(Color.TRANSPARENT);
+            _rec.setFill(Color.YELLOW);
+            borderPane.getChildren().add(_rec);
+
+        });
+
         // Create Add-on Menu
         Menu addOnMenu = new Menu("Add-ons");
         addOnMenu.setStyle("-fx-font-size: 15px;");
         // Create Help Menu
         Menu helpMenu = new Menu("Help");
         helpMenu.setStyle("-fx-font-size: 15px;");
+        MenuItem _helpItem = new MenuItem("READ ME");
+        helpMenu.getItems().addAll(_helpItem);
+        _helpItem.setOnAction(e->{
+            File _readMeFile = new File("README.md");
+            try {
+                Desktop.getDesktop().open(_readMeFile);
+            }catch (Exception ex){
+                System.err.println("Error opening README.MD");
+                ex.printStackTrace();
+            }
+        });
+
         // Create and add menu to the menu bar
         MenuBar menuBar = new MenuBar();
         menuBar.getMenus().addAll(fileMenu, editMenu, addOnMenu, helpMenu);
@@ -360,7 +458,6 @@ public class OnlineDocClient extends Application {
         lineBox.getChildren().addAll(line2, userBox);
 
         // Implement and setup the border pane
-        BorderPane borderPane = new BorderPane();
         borderPane.setTop(menuBox);
         borderPane.setCenter(textBox);
         borderPane.setRight(lineBox);
@@ -393,6 +490,14 @@ public class OnlineDocClient extends Application {
         tmp.getChildren().addAll(circle,text);
 
         return tmp;
+    }
+
+    public void  _filePicker(FileChooser _file){
+        _file.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Word Document", "*.docx"),
+                new FileChooser.ExtensionFilter("Text Document", "*.txt"),
+                new FileChooser.ExtensionFilter("Read Me Document", "*.md")
+        );
     }
 
 }

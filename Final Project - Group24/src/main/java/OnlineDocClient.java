@@ -1,4 +1,6 @@
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -30,7 +32,7 @@ public class OnlineDocClient extends Application {
         Pane pane = new Pane();
 
         // Implement logo image
-        Image image = new Image("Images/logo.png");
+        Image image = new Image("resources/Images/logo.png");
         ImageView imageView = new ImageView(image);
         // Set image view to appropriate size
         imageView.setFitWidth(160);
@@ -40,7 +42,7 @@ public class OnlineDocClient extends Application {
         imageView.setY(50);
 
         //Implement Exit Button Image
-        Image imageX = new Image("Images/X.png");
+        Image imageX = new Image("resources/Images/X.png");
         ImageView imageViewX = new ImageView(imageX);
         // Set image view to appropriate size
         imageViewX.setFitWidth(25);
@@ -130,7 +132,7 @@ public class OnlineDocClient extends Application {
         Stage stage = new Stage();
 
         // Implement logo image
-        Image image = new Image("Images/logo.png");
+        Image image = new Image("Resources/Images/logo.png");
         ImageView imageView = new ImageView(image);
         // Set image view to appropriate size
         imageView.setFitWidth(120);
@@ -138,7 +140,7 @@ public class OnlineDocClient extends Application {
 
 
         //Implement Exit Button Image
-        Image imageX = new Image("Images/X.png");
+        Image imageX = new Image("Resources/Images/X.png");
         ImageView imageViewX = new ImageView(imageX);
         // Set image view to appropriate size
         imageViewX.setFitWidth(20);
@@ -171,7 +173,7 @@ public class OnlineDocClient extends Application {
         });
 
         //Implement Minimize Button Image
-        Image imageM = new Image("Images/-.png");
+        Image imageM = new Image("Resources/Images/-.png");
         ImageView imageViewM = new ImageView(imageM);
         // Set image view to appropriate size
         imageViewM.setFitWidth(20);
@@ -244,13 +246,30 @@ public class OnlineDocClient extends Application {
         textArea.setPromptText("Hello " + name + ", please type to start your document."); //Creates prompt text
         textArea.setFocusTraversable(false);
         //Adds a listener to the textArea so we can see how the user is editing in real time. Sends to server.
-        textArea.textProperty().addListener((_Observer, _previousVal, _currentVal) -> {
-            try {
-                clientObj.sendToServer(_currentVal);
-            } catch (IOException e) {
-                e.printStackTrace();
+        //textArea.textProperty().addListener((_Observer, _previousVal, _currentVal) -> {
+        ChangeListener<String> TempListener = new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String _previousVal, String  _currentVal) {
+                try {
+                    //System.out.println("CUR: " + _currentVal);
+                    //System.out.println("PREV: " + _previousVal);
+
+                    if(!_currentVal.equals(_previousVal) && !_currentVal.isEmpty() && !_previousVal.isEmpty()){
+                        //clientObj.RemoveListener();
+                        int offset =  _currentVal.length() - _previousVal.length();
+                        //System.out.println("PREV LENGTH: " + _previousVal.length());
+                        //System.out.println("CUR LENGTH: " + _currentVal.length());
+                        clientObj.sendToServer(_currentVal, textArea, offset);
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        });
+        };
+        clientObj.SetListener(TempListener);
+        clientObj.AddListener();
+        //});
 
         // Implement a small menu for manipulate text in text area
         // Text Font
