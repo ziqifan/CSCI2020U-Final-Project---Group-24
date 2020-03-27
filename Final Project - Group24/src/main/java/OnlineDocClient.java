@@ -6,6 +6,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
@@ -30,7 +34,9 @@ import javafx.stage.StageStyle;
 
 import java.awt.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class OnlineDocClient extends Application {
     // Create a Text Area
@@ -323,13 +329,18 @@ public class OnlineDocClient extends Application {
         // Create Add-on Menu
         Menu addOnMenu = new Menu("Add-ons");
         addOnMenu.setStyle("-fx-font-size: 15px;");
+        MenuItem histogram = new MenuItem("Histogram");
+        addOnMenu.getItems().addAll(histogram);
+        histogram.setOnAction(e->{
+            Histogram(textArea.getText());
+        });
         // Create Help Menu
         Menu helpMenu = new Menu("Help");
         helpMenu.setStyle("-fx-font-size: 15px;");
         MenuItem _helpItem = new MenuItem("READ ME");
         helpMenu.getItems().addAll(_helpItem);
         _helpItem.setOnAction(e->{
-            File _readMeFile = new File("Resources/README.md");
+            File _readMeFile = new File("README.md");
             try {
                 Desktop.getDesktop().open(_readMeFile); //Opens our README file
             }catch (Exception ex){
@@ -525,4 +536,41 @@ public class OnlineDocClient extends Application {
         );
     }
 
+    public void Histogram(String document){
+        Stage stage = new Stage();
+        FlowPane pane = new FlowPane();
+
+        // Count the number of letters on each type
+        for(int i = 0; i < 26; i++) {
+            numberOfLetterType[i] += document.length() - document.replaceAll(letterType[i], "").length();
+            numberOfLetterType[i] += document.length() - document.replaceAll(letterType[i].toLowerCase(), "").length();
+        }
+
+        // Create bar chart
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Letters");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Occurrences");
+        BarChart letterChart = new BarChart(xAxis, yAxis);
+        XYChart.Series dataSeries = new XYChart.Series();
+        dataSeries.setName("Letter Occurrences In Text");
+        for(int i = 0; i < 26; i++) {
+            dataSeries.getData().add(new XYChart.Data(letterType[i], numberOfLetterType[i]));
+        }
+        letterChart.getData().add(dataSeries);
+        letterChart.setBarGap(0);
+        letterChart.setCategoryGap(2);
+
+        pane.getChildren().addAll(letterChart);
+
+        // Main Scene
+        Scene scene = new Scene(pane, 500, 455);
+        stage.setScene(scene);
+        stage.setTitle("Histogram");
+        stage.show();
+    }
+
+    // Data for the Bar Chart
+    private static String[] letterType = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+    private static int[] numberOfLetterType = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 }
