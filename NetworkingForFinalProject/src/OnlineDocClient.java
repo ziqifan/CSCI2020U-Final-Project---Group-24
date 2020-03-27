@@ -468,6 +468,22 @@ public class OnlineDocClient extends Application {
         borderPane.setCenter(textBox);
         borderPane.setRight(lineBox);
 
+        // When mouse pressed on board pane the window can be drag
+        borderPane.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                xOffSet = stage.getX() - event.getScreenX();
+                yOffSet = stage.getY() - event.getScreenY();
+            }
+        });
+        borderPane.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                stage.setX(event.getScreenX() + xOffSet);
+                stage.setY(event.getScreenY() + yOffSet);
+            }
+        });
+
         // Set up the scene
         Scene scene = new Scene(borderPane,1000,800);
         stage.setScene(scene);
@@ -475,6 +491,10 @@ public class OnlineDocClient extends Application {
         stage.initStyle(StageStyle.UNDECORATED);
         stage.show();
     }
+
+    // Parameters help with drag Window
+    public double xOffSet = 0;
+    public double yOffSet = 0;
 
     TextArea getTextArea(){
         return textArea;

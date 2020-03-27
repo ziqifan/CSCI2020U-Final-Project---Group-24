@@ -19,9 +19,13 @@ public class OnlineDocServer extends Application {
     private int clientNo = 0;
     private List<HandleAClient> AllClients = new ArrayList<>();
 
+    private String _filePath = "Test.txt";
+    File _DeleteServerFile = new File(_filePath);
     @Override
     public void start(Stage primaryStage) {
-
+        if(_DeleteServerFile.exists()) {
+            _DeleteServerFile.delete();
+        }
         Scene scene = new Scene(new ScrollPane(ta), 450, 200);
         primaryStage.setTitle("Online Doc Server"); // Set the stage title
         primaryStage.setScene(scene); // Place the scene in the stage
@@ -119,7 +123,7 @@ public class OnlineDocServer extends Application {
                     }
                     else if(inmsg.equals("DONE")){
                         System.out.println(this.NewMessage);
-                        _FileO("src/Resources/Test.txt", this.NewMessage);
+                        _FileO(_filePath, this.NewMessage);
                         this.OldMessage = this.NewMessage;
                         this.NewMessage = "";
                     }
@@ -128,7 +132,7 @@ public class OnlineDocServer extends Application {
                     //Sends the final message update to any client that is not the client which sent the data.
                     for (HandleAClient temp:AllClients) {
                         if(temp.GetNumber() != this.MyNumber){
-                            _testFileIn("src/Resources/Test.txt", temp);
+                            _testFileIn(_filePath, temp);
                         }
                     }
                     Platform.runLater(() -> {

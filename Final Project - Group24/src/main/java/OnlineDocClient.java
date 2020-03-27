@@ -7,6 +7,13 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -14,17 +21,28 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.*;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
 public class OnlineDocClient extends Application {
     // Create a Text Area
     private TextArea textArea = new TextArea();
+
+    private double _startMouseX;
+    private double _startMouseY;
+    private double _endMouseX;
+    private double _endMouseY;
+
+    //Create Border Pane
+    private BorderPane borderPane = new BorderPane();
     @Override
     public void start(Stage primaryStage) throws Exception {
 
@@ -32,7 +50,7 @@ public class OnlineDocClient extends Application {
         Pane pane = new Pane();
 
         // Implement logo image
-        Image image = new Image("resources/Images/logo.png");
+        Image image = new Image("Images/logo.png");
         ImageView imageView = new ImageView(image);
         // Set image view to appropriate size
         imageView.setFitWidth(160);
@@ -42,7 +60,7 @@ public class OnlineDocClient extends Application {
         imageView.setY(50);
 
         //Implement Exit Button Image
-        Image imageX = new Image("resources/Images/X.png");
+        Image imageX = new Image("Images/X.png");
         ImageView imageViewX = new ImageView(imageX);
         // Set image view to appropriate size
         imageViewX.setFitWidth(25);
@@ -127,12 +145,13 @@ public class OnlineDocClient extends Application {
     }
 
     void documentStage(String name){
+        //Initalizes client backend class
         ClientBackend clientObj = new ClientBackend(textArea);
         //Initial stage
         Stage stage = new Stage();
 
         // Implement logo image
-        Image image = new Image("Resources/Images/logo.png");
+        Image image = new Image("Images/logo.png");
         ImageView imageView = new ImageView(image);
         // Set image view to appropriate size
         imageView.setFitWidth(120);
@@ -140,7 +159,7 @@ public class OnlineDocClient extends Application {
 
 
         //Implement Exit Button Image
-        Image imageX = new Image("Resources/Images/X.png");
+        Image imageX = new Image("Images/X.png");
         ImageView imageViewX = new ImageView(imageX);
         // Set image view to appropriate size
         imageViewX.setFitWidth(20);
@@ -173,7 +192,7 @@ public class OnlineDocClient extends Application {
         });
 
         //Implement Minimize Button Image
-        Image imageM = new Image("Resources/Images/-.png");
+        Image imageM = new Image("Images/-.png");
         ImageView imageViewM = new ImageView(imageM);
         // Set image view to appropriate size
         imageViewM.setFitWidth(20);
@@ -205,6 +224,7 @@ public class OnlineDocClient extends Application {
             stage.setIconified(true);
         });
 
+
         // Implement Title text
         Text text = new Text("  Online Document - New");
         // Set the font and color of text
@@ -214,27 +234,110 @@ public class OnlineDocClient extends Application {
         // Create File Menu
         Menu fileMenu = new Menu("File");
         fileMenu.setStyle("-fx-font-size: 15px;");
+
         // Create menu items
+        MenuItem itemOpen = new MenuItem("Open");
         MenuItem itemDownload = new MenuItem("Download");
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Word Document", "*.docx"),
-                new FileChooser.ExtensionFilter("Text Document", "*.txt")
-        );
-        itemDownload.setOnAction(e->{
+        _filePicker(fileChooser);
+        itemOpen.setOnAction(e->{
             File selectedFile = fileChooser.showOpenDialog(stage);
+            if(selectedFile != null) {
+                clientObj._FileI(selectedFile, textArea); //Handles opening a txt file
+            }
         });
+
+        itemDownload.setOnAction(e-> {
+            File selectedFile = fileChooser.showSaveDialog(stage);
+            if (clientObj.getCurrent() != null && selectedFile != null) {
+                if(selectedFile.length() > 0){ //Checks if the user chooses to replace an existing file. This makes it so .append works
+                    selectedFile.delete();
+                }
+                for (int i = 0; i < clientObj.getCurrent().length; i++) { //Gets the size of our textarea array
+                    if (clientObj.getCurrent()[i] != null) {
+                        try {
+                            clientObj._FileO(selectedFile.getPath(), clientObj.getCurrent()[i]); //Writes each line in a for loop to our text file
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+
         // Add items to menu
+        fileMenu.getItems().addAll(itemOpen);
         fileMenu.getItems().addAll(itemDownload);
+
         // Create Edit Menu
         Menu editMenu = new Menu("Edit");
         editMenu.setStyle("-fx-font-size: 15px;");
+        MenuItem _selectAll = new MenuItem("Select All");
+        MenuItem _Highlight = new MenuItem("Highlight");
+
+        editMenu.getItems().addAll(_selectAll, _Highlight);
+        _selectAll.setOnAction(e->{
+            textArea.selectAll();
+        });
+
+        textArea.setOnMouseClicked(new EventHandler<MouseEvent>() { //Keeps track of first click when selecting
+            @Override
+            public void handle(MouseEvent event) {
+                _startMouseX = event.getSceneX();
+                _startMouseY = event.getSceneY();
+
+                System.out.println(_startMouseX + " " + _startMouseY);
+            }
+        });
+
+        textArea.setOnMouseReleased(new EventHandler<MouseEvent>() {//Keeps track of release point when selecting
+            @Override
+            public void handle(MouseEvent event) {
+                _endMouseX = event.getSceneX();
+                _endMouseY = event.getSceneY();
+            }
+        });
+
+        _Highlight.setOnAction(e->{
+            //textArea.setBlendMode(BlendMode.ADD);
+            Text _selected = new Text(textArea.getSelectedText()); //Gets the text that was selected prior to pressing highlight
+            _selected.setFont(textArea.getFont());
+
+            //We create a textbox to get the bounds of our width and height to know how big our rectangle needs to be according to font and size of text
+            double _txtWidth = _selected.getBoundsInLocal().getWidth();
+            double _txtHeight = _selected.getBoundsInLocal().getHeight();
+            double _txtX = _selected.getBoundsInLocal().getMaxX();
+            double _txtY = _selected.getBoundsInLocal().getMinY();
+
+            //Creates our rectangle based on the demensions of our text that we selected and where we clicked in our given textarea
+            Rectangle _rec = new Rectangle(_startMouseX - _endMouseX,_startMouseY - _endMouseY + _txtY,_txtWidth,_txtHeight);
+            _rec.setBlendMode(BlendMode.DARKEN); //We use darken blending to have our yellow rectangle appear behind our text.
+
+
+            //_rec.setFill(Color.TRANSPARENT);
+            _rec.setFill(Color.YELLOW); //Sets our highlight to yellow
+            borderPane.getChildren().add(_rec); //Adds ot to our borderPane
+
+        });
+
         // Create Add-on Menu
         Menu addOnMenu = new Menu("Add-ons");
         addOnMenu.setStyle("-fx-font-size: 15px;");
         // Create Help Menu
         Menu helpMenu = new Menu("Help");
         helpMenu.setStyle("-fx-font-size: 15px;");
+        MenuItem _helpItem = new MenuItem("READ ME");
+        helpMenu.getItems().addAll(_helpItem);
+        _helpItem.setOnAction(e->{
+            File _readMeFile = new File("Resources/README.md");
+            try {
+                Desktop.getDesktop().open(_readMeFile); //Opens our README file
+            }catch (Exception ex){
+                System.err.println("Error opening README.MD");
+                ex.printStackTrace();
+            }
+        });
+
         // Create and add menu to the menu bar
         MenuBar menuBar = new MenuBar();
         menuBar.getMenus().addAll(fileMenu, editMenu, addOnMenu, helpMenu);
@@ -360,10 +463,25 @@ public class OnlineDocClient extends Application {
         lineBox.getChildren().addAll(line2, userBox);
 
         // Implement and setup the border pane
-        BorderPane borderPane = new BorderPane();
         borderPane.setTop(menuBox);
         borderPane.setCenter(textBox);
         borderPane.setRight(lineBox);
+
+        // When mouse pressed on board pane the window can be drag
+        borderPane.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                xOffSet = stage.getX() - event.getScreenX();
+                yOffSet = stage.getY() - event.getScreenY();
+            }
+        });
+        borderPane.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                stage.setX(event.getScreenX() + xOffSet);
+                stage.setY(event.getScreenY() + yOffSet);
+            }
+        });
 
         // Set up the scene
         Scene scene = new Scene(borderPane,1000,800);
@@ -372,6 +490,10 @@ public class OnlineDocClient extends Application {
         stage.initStyle(StageStyle.UNDECORATED);
         stage.show();
     }
+
+    // Parameters help with drag Window
+    public double xOffSet = 0;
+    public double yOffSet = 0;
 
     TextArea getTextArea(){
         return textArea;
@@ -393,6 +515,14 @@ public class OnlineDocClient extends Application {
         tmp.getChildren().addAll(circle,text);
 
         return tmp;
+    }
+
+    public void  _filePicker(FileChooser _file){ //Handles the type of file extensions our user can open/save
+        _file.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Word Document", "*.docx"),
+                new FileChooser.ExtensionFilter("Text Document", "*.txt"),
+                new FileChooser.ExtensionFilter("Read Me Document", "*.md")
+        );
     }
 
 }
