@@ -146,6 +146,7 @@ public class OnlineDocClient extends Application {
     }
 
     void documentStage(String name){
+        //Initalizes client backend class
         ClientBackend clientObj = new ClientBackend(textArea);
         //Initial stage
         Stage stage = new Stage();
@@ -224,6 +225,7 @@ public class OnlineDocClient extends Application {
             stage.setIconified(true);
         });
 
+
         // Implement Title text
         Text text = new Text("  Online Document - New");
         // Set the font and color of text
@@ -242,20 +244,20 @@ public class OnlineDocClient extends Application {
         itemOpen.setOnAction(e->{
             File selectedFile = fileChooser.showOpenDialog(stage);
             if(selectedFile != null) {
-                clientObj._FileI(selectedFile, textArea);
+                clientObj._FileI(selectedFile, textArea); //Handles opening a txt file
             }
         });
 
         itemDownload.setOnAction(e-> {
             File selectedFile = fileChooser.showSaveDialog(stage);
             if (clientObj.getCurrent() != null && selectedFile != null) {
-                if(selectedFile.length() > 0){
+                if(selectedFile.length() > 0){ //Checks if the user chooses to replace an existing file. This makes it so .append works
                     selectedFile.delete();
                 }
-                for (int i = 0; i < clientObj.getCurrent().length; i++) {
+                for (int i = 0; i < clientObj.getCurrent().length; i++) { //Gets the size of our textarea array
                     if (clientObj.getCurrent()[i] != null) {
                         try {
-                            clientObj._FileO(selectedFile.getPath(), clientObj.getCurrent()[i]);
+                            clientObj._FileO(selectedFile.getPath(), clientObj.getCurrent()[i]); //Writes each line in a for loop to our text file
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
@@ -279,7 +281,7 @@ public class OnlineDocClient extends Application {
             textArea.selectAll();
         });
 
-        textArea.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        textArea.setOnMouseClicked(new EventHandler<MouseEvent>() { //Keeps track of first click when selecting
             @Override
             public void handle(MouseEvent event) {
                 _startMouseX = event.getSceneX();
@@ -289,7 +291,7 @@ public class OnlineDocClient extends Application {
             }
         });
 
-        textArea.setOnMouseReleased(new EventHandler<MouseEvent>() {
+        textArea.setOnMouseReleased(new EventHandler<MouseEvent>() {//Keeps track of release point when selecting
             @Override
             public void handle(MouseEvent event) {
                 _endMouseX = event.getSceneX();
@@ -299,19 +301,23 @@ public class OnlineDocClient extends Application {
 
         _Highlight.setOnAction(e->{
             //textArea.setBlendMode(BlendMode.ADD);
-            Text _selected = new Text(textArea.getSelectedText());
+            Text _selected = new Text(textArea.getSelectedText()); //Gets the text that was selected prior to pressing highlight
             _selected.setFont(textArea.getFont());
+
+            //We create a textbox to get the bounds of our width and height to know how big our rectangle needs to be according to font and size of text
             double _txtWidth = _selected.getBoundsInLocal().getWidth();
             double _txtHeight = _selected.getBoundsInLocal().getHeight();
             double _txtX = _selected.getBoundsInLocal().getMaxX();
             double _txtY = _selected.getBoundsInLocal().getMinY();
+
+            //Creates our rectangle based on the demensions of our text that we selected and where we clicked in our given textarea
             Rectangle _rec = new Rectangle(_startMouseX - _endMouseX,_startMouseY - _endMouseY + _txtY,_txtWidth,_txtHeight);
-            _rec.setBlendMode(BlendMode.DARKEN);
+            _rec.setBlendMode(BlendMode.DARKEN); //We use darken blending to have our yellow rectangle appear behind our text.
 
 
             //_rec.setFill(Color.TRANSPARENT);
-            _rec.setFill(Color.YELLOW);
-            borderPane.getChildren().add(_rec);
+            _rec.setFill(Color.YELLOW); //Sets our highlight to yellow
+            borderPane.getChildren().add(_rec); //Adds ot to our borderPane
 
         });
 
@@ -324,9 +330,9 @@ public class OnlineDocClient extends Application {
         MenuItem _helpItem = new MenuItem("READ ME");
         helpMenu.getItems().addAll(_helpItem);
         _helpItem.setOnAction(e->{
-            File _readMeFile = new File("README.md");
+            File _readMeFile = new File("Resources/README.md");
             try {
-                Desktop.getDesktop().open(_readMeFile);
+                Desktop.getDesktop().open(_readMeFile); //Opens our README file
             }catch (Exception ex){
                 System.err.println("Error opening README.MD");
                 ex.printStackTrace();
@@ -492,7 +498,7 @@ public class OnlineDocClient extends Application {
         return tmp;
     }
 
-    public void  _filePicker(FileChooser _file){
+    public void  _filePicker(FileChooser _file){ //Handles the type of file extensions our user can open/save
         _file.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Word Document", "*.docx"),
                 new FileChooser.ExtensionFilter("Text Document", "*.txt"),

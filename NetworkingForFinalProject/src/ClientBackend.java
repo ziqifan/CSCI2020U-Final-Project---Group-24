@@ -126,33 +126,33 @@ public class ClientBackend extends OnlineDocClient {
     }
 
     public String[] getCurrent(){
-        return _currentLine;
+        return _currentLine; //Returns our string array that holds all of our lines from the textArea
     }
 
     public void _FileO(String _filePath, String _line) throws IOException {
         System.out.println(_line);
-        BufferedWriter _out = new BufferedWriter(new FileWriter(_filePath, true));
-        _out.append(_line);
-        _out.newLine();
-        _out.flush();
-        _out.close();
+        BufferedWriter _out = new BufferedWriter(new FileWriter(_filePath, true)); //We need to append each line of our file so this must be true
+        _out.append(_line);//Appends our line so we can contiune to write each line
+        _out.newLine(); //Creates a newline after the first line is written
+        _out.flush(); //Flushes our buffer so we don't read the same string again on the next call
+        _out.close(); //Closes our file
     }
 
     public void _FileI(File _file, TextArea _txt) {
 
-        if (_file.exists()) {
+        if (_file.exists()) { //Checks if file exists
             String _nextLine;
             try {
-                Scanner _search = new Scanner(_file);
-                while (_search.hasNextLine()) {
+                Scanner _search = new Scanner(_file); //Creates scannar to search file
+                while (_search.hasNextLine()) { //While nextline exists
 
-                    _nextLine = _search.nextLine();
+                    _nextLine = _search.nextLine(); //Sets our nextline string to whatever our next line is
                     if (_nextLine != null) {
-                        _txt.appendText(_nextLine + '\n');
+                        _txt.appendText(_nextLine + '\n'); //Appends our current line to our textarea then adds a new line
                     }
 
                 }
-            } catch (FileNotFoundException e) {
+            } catch (FileNotFoundException e) { //Error checks
                 e.printStackTrace();
             }
         }
